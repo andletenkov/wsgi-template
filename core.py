@@ -34,7 +34,7 @@ def not_found_handler(request: dict) -> Response:
 
 
 def redirect_handler(request: dict) -> Response:
-    location = request['PATH_INFO'][:-1]
+    location = request['PATH_INFO'].rstrip('/')
     return Response(status=301, headers={'Location': location})
 
 
@@ -45,7 +45,12 @@ class App:
 
     def __call__(self, request: dict, start_response: callable) -> list:
         path = request['PATH_INFO']
-        handler = self._handlers.get(path, not_found_handler) if path.endswith('/') else redirect_handler
+
+        if path.endswith('/'):
+            handler = redirect_handler
+        else:
+            handler = self._handlers.get(path, not_found_handler)
+
         resp = handler(request)
 
         start_response(
