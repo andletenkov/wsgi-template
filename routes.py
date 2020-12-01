@@ -1,9 +1,9 @@
 import json
 
-from core import App, Response
+from core import route, Response
 
 
-@App.route('/echo')
+@route('/echo')
 def echo(request):
     body = json.dumps({
         'method': request['REQUEST_METHOD'],

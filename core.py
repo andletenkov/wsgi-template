@@ -8,6 +8,14 @@ class Response:
     headers: list = field(default_factory=list)
 
 
+def route(path: str) -> callable:
+    def wrapper(func):
+        App.add_handler(path, func)
+        return func
+
+    return wrapper
+
+
 def not_found_handler(*args, **kwargs) -> Response:
     return Response('Not found :(', '404 Not Found', [('Content-Type', 'text/plain')])
 
@@ -24,13 +32,5 @@ class App:
         return [response.body.encode()]
 
     @classmethod
-    def add_handler(cls, route: str, handler: callable) -> None:
-        cls._handlers[route] = handler
-
-    @classmethod
-    def route(cls, path: str) -> callable:
-        def wrapper(func):
-            cls.add_handler(path, func)
-            return func
-
-        return wrapper
+    def add_handler(cls, path: str, handler: callable) -> None:
+        cls._handlers[path] = handler
