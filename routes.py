@@ -3,7 +3,7 @@ import json
 from core import App, Response
 
 
-@App.route('/')
+@App.route('/echo')
 def echo(request):
     body = json.dumps({
         'method': request['REQUEST_METHOD'],
