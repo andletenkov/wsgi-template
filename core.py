@@ -29,14 +29,6 @@ class Response:
         self.headers = list(resp_headers.items())
 
 
-def route(path: str) -> callable:
-    def wrapper(func):
-        App.add_handler(path, func)
-        return func
-
-    return wrapper
-
-
 def not_found_handler(request: dict) -> Response:
     return Response(text='Not found :(', status=404)
 
@@ -47,7 +39,9 @@ def redirect_handler(request: dict) -> Response:
 
 
 class App:
-    _handlers = {}
+
+    def __init__(self):
+        self._handlers = {}
 
     def __call__(self, request: dict, start_response: callable) -> list:
         path = request['PATH_INFO']
@@ -60,6 +54,12 @@ class App:
         )
         return [resp.body.encode()]
 
-    @classmethod
-    def add_handler(cls, path: str, handler: callable) -> None:
-        cls._handlers[path] = handler
+    def add_handler(self, path: str, handler: callable) -> None:
+        self._handlers[path] = handler
+
+    def route(self, path: str) -> callable:
+        def wrapper(func):
+            self.add_handler(path, func)
+            return func
+
+        return wrapper
