@@ -37,12 +37,13 @@ def route(path: str) -> callable:
     return wrapper
 
 
-def not_found_handler(*args, **kwargs) -> Response:
+def not_found_handler(request: dict) -> Response:
     return Response(text='Not found :(', status=404)
 
 
-def redirect_handler(path: str) -> Response:
-    return Response(status=301, headers={'Location': path})
+def redirect_handler(request: dict) -> Response:
+    location = request['PATH_INFO'][:-1]
+    return Response(status=301, headers={'Location': location})
 
 
 class App:
@@ -50,12 +51,8 @@ class App:
 
     def __call__(self, request: dict, start_response: callable) -> list:
         path = request['PATH_INFO']
-
-        if path.endswith('/'):
-            resp = redirect_handler(path[:-1])
-        else:
-            handler = self._handlers.get(path, not_found_handler)
-            resp = handler(request)
+        handler = self._handlers.get(path, not_found_handler) if path.endswith('/') else redirect_handler
+        resp = handler(request)
 
         start_response(
             f'{resp.status} {responses[resp.status]}',
